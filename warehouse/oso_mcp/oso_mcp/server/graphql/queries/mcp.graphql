@@ -49,6 +49,7 @@ fragment DataModelRevisionFields on DataModelRevision {
   hash
   description
   language
+  code
   createdAt
 }
 
@@ -74,6 +75,7 @@ fragment NotebookFields on Notebook {
   id
   orgId
   name
+  data
   description
   preview
   creatorId
@@ -104,7 +106,7 @@ query ListDatasets($first: Int = 50, $after: String, $where: JSON) {
 #   datasetName (String!): The name of the dataset.
 #   where (JSON!): Filter conditions for the tables.
 query ListTablesForDataset($datasetName: String!) {
-  datasets(where: { name: { eq: $datasetName } }, single: true) {
+  datasets(where: { name: { eq: $datasetName } }) {
     edges {
       node {
         id
@@ -130,7 +132,7 @@ query ListTablesForDataset($datasetName: String!) {
 # fields should use snake_case due to how the filtering is implemented in the
 # backend.
 query ListTablesForDatasetWhere($datasetName: String!, $where: JSON!) {
-  datasets(where: { name: { eq: $datasetName } }, single: true) {
+  datasets(where: { name: { eq: $datasetName } }) {
     edges {
       node {
         id

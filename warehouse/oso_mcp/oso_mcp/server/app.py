@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import hashlib
 import os
@@ -133,6 +134,48 @@ def setup_mcp_app(config: MCPConfig):
             parameters=[nl_query],
             results=[response.json()["sql"]],
         )
+
+    @mcp.tool(
+        description="Execute a SQL query against the OSO data warehouse and return results. "
+        "Supports Trino SQL dialect. Use row_limit to control how many rows are returned (max 1000).",
+    )
+    async def execute_sql(
+        sql: str,
+        ctx: Context,
+        row_limit: int = 100,
+    ) -> McpResponse:
+        """
+        Execute a SQL query against the OSO warehouse.
+
+        Args:
+            sql: SQL query string (Trino dialect)
+            ctx: Request context
+            row_limit: Maximum number of rows to return (default 100, max 1000)
+        """
+        app_ctx: AppContext = ctx.request_context.lifespan_context
+        if app_ctx.oso_client is None:
+            return McpErrorResponse(
+                tool_name="execute_sql", error="OSO client not initialized"
+            )
+
+        row_limit = min(max(1, row_limit), 1000)
+
+        try:
+            response = await asyncio.to_thread(app_ctx.oso_client.query, sql)
+            rows = response.data.data[:row_limit]
+            return McpSuccessResponse(
+                tool_name="execute_sql",
+                parameters=[sql],
+                results=[
+                    {
+                        "columns": response.data.columns,
+                        "rows": rows,
+                        "row_count": len(rows),
+                    }
+                ],
+            )
+        except Exception as e:
+            return McpErrorResponse(tool_name="execute_sql", error=str(e))
 
     @mcp.tool(
         description="Generates a deterministic OSO ID (SHA256 hash base64 encoded) from a list of input values. Use this to verify IDs in tests.",

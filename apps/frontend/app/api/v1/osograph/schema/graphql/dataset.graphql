@@ -46,6 +46,11 @@ type Dataset {
   Whether the current user's organization is subscribed to this dataset.
   """
   isSubscribed(orgId: ID!): Boolean!
+
+  """
+  Whether this dataset is publicly available in the marketplace.
+  """
+  isPublic: Boolean!
 }
 
 union DatasetTypeDefinition =

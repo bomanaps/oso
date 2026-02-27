@@ -1,3 +1,4 @@
+import { getResourcePublicPermission } from "@/app/api/v1/osograph/utils/access-control";
 import {
   getOrganization,
   getUserProfile,
@@ -54,6 +55,17 @@ export const datasetTypeResolvers: Pick<
           .is("revoked_at", null)
           .maybeSingle();
         return !!data;
+      }),
+
+    isPublic: createResolver<DatasetResolvers, "isPublic">()
+      .use(withOrgResourceClient("dataset", ({ parent }) => parent.id, "read"))
+      .resolve(async (parent, _args, context) => {
+        const permission = await getResourcePublicPermission(
+          parent.id,
+          "dataset",
+          context.client,
+        );
+        return permission !== "none";
       }),
 
     creator: createResolver<DatasetResolvers, "creator">()

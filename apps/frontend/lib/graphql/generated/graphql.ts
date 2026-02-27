@@ -1941,6 +1941,8 @@ export type Dataset = {
   description?: Maybe<Scalars["String"]["output"]>;
   displayName?: Maybe<Scalars["String"]["output"]>;
   id: Scalars["ID"]["output"];
+  /** Whether this dataset is publicly available in the marketplace. */
+  isPublic: Scalars["Boolean"]["output"];
   /** Whether the current user's organization is subscribed to this dataset. */
   isSubscribed: Scalars["Boolean"]["output"];
   /**

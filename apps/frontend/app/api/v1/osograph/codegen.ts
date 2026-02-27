@@ -9,7 +9,10 @@ const config: CodegenConfig = {
         enumsAsConst: true,
         contextType: "@/app/api/v1/osograph/types/context#GraphQLContext",
         scalars: {
-          JSON: "Record<string, unknown>",
+          JSON: {
+            input: "Record<string, unknown>",
+            output: "import('@/lib/types/supabase').Json",
+          },
           DateTime: "string",
         },
         mappers: {

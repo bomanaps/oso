@@ -89,7 +89,7 @@ export const permissionMutations =
                 user_id: input.targetUserId ?? null,
                 org_id: input.targetOrgId ?? null,
                 permission_level: input.permissionLevel.toLowerCase(),
-                granted_by: context.authenticatedUser.userId,
+                granted_by: context.authenticatedUser?.userId ?? null,
               };
 
               logger.info("Granting resource permission with insert data", {

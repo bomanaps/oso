@@ -71,7 +71,7 @@ export type OrgScopedContext = GraphQLContext & {
   orgId: string;
   orgRole: OrgRole;
   userId: string;
-  authenticatedUser: ReturnType<typeof requireAuthentication>;
+  authenticatedUser: ReturnType<typeof requireAuthentication> | null;
 };
 
 /**
@@ -94,7 +94,7 @@ export type AuthenticatedClientContext = GraphQLContext & {
   userId: string;
   orgIds: string[];
   orgScope: OrgScope;
-  authenticatedUser: ReturnType<typeof requireAuthentication>;
+  authenticatedUser: ReturnType<typeof requireAuthentication> | null;
 };
 
 /**
@@ -116,7 +116,7 @@ export type ResourceScopedContext = GraphQLContext & {
   permissionLevel: Exclude<PermissionLevel, "none">;
   resourceId: string;
   orgId: string;
-  authenticatedUser: ReturnType<typeof requireAuthentication>;
+  authenticatedUser: ReturnType<typeof requireAuthentication> | null;
 };
 
 /**

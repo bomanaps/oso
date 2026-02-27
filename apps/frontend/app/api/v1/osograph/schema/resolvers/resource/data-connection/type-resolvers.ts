@@ -4,6 +4,7 @@ import {
   type Resolvers,
 } from "@/app/api/v1/osograph/types/generated/types";
 import { DataConnectionTypeSchema } from "@/app/api/v1/osograph/types/generated/validation";
+import { ServerErrors } from "@/app/api/v1/osograph/utils/errors";
 import { createResolver } from "@/app/api/v1/osograph/utils/resolver-builder";
 import { withOrgResourceClient } from "@/app/api/v1/osograph/utils/resolver-middleware";
 import { getOrganization } from "@/app/api/v1/osograph/utils/auth";
@@ -80,6 +81,11 @@ export const dataConnectionTypeResolvers: Pick<
       )
       .resolve(async (parent, args, context) => {
         const tableId = generateTableId("DATA_CONNECTION", args.tableName);
+        if (!context.authenticatedUser) {
+          throw ServerErrors.internal(
+            "authenticatedUser required for previewData",
+          );
+        }
         return executePreviewQuery(
           parent.org_id,
           parent.dataset_id,

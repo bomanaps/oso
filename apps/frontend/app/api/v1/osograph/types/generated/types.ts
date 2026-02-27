@@ -58,7 +58,10 @@ export type Scalars = {
   Int: { input: number; output: number };
   Float: { input: number; output: number };
   DateTime: { input: string; output: string };
-  JSON: { input: Record<string, unknown>; output: Record<string, unknown> };
+  JSON: {
+    input: Record<string, unknown>;
+    output: import("@/lib/types/supabase").Json;
+  };
 };
 
 export type AcceptInvitationInput = {

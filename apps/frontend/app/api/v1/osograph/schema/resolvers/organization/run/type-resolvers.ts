@@ -15,7 +15,6 @@ import { assertNever } from "@opensource-observer/utils";
 import { queryWithPagination } from "@/app/api/v1/osograph/utils/query-helpers";
 import { StepWhereSchema } from "@/app/api/v1/osograph/utils/validation";
 import type { RunRow } from "@/lib/types/schema-types";
-import z from "zod";
 
 function mapRunStatus(status: RunRow["status"]): RunStatus {
   switch (status) {
@@ -48,7 +47,7 @@ export const runTypeResolvers: Required<Pick<Resolvers, "Run">> = {
     status: (parent) => mapRunStatus(parent.status),
     startedAt: (parent) => parent.started_at,
     finishedAt: (parent) => parent.completed_at,
-    metadata: (parent) => z.record(z.unknown()).parse(parent.metadata),
+    metadata: (parent) => parent.metadata,
 
     logsUrl: async (parent) => {
       if (!parent.logs_url) return null;

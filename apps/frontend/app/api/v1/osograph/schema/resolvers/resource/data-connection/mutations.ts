@@ -139,6 +139,11 @@ export const dataConnectionMutations =
             throw ResourceErrors.notFound("DataConnection", id);
           }
 
+          if (!context.authenticatedUser) {
+            throw ServerErrors.internal(
+              "authenticatedUser required for syncDataConnection",
+            );
+          }
           const queuedRun = await syncDataConnection(
             context.client,
             context.authenticatedUser.userId,

@@ -1,5 +1,8 @@
 import { getOrganization } from "@/app/api/v1/osograph/utils/auth";
-import { ResourceErrors } from "@/app/api/v1/osograph/utils/errors";
+import {
+  ResourceErrors,
+  ServerErrors,
+} from "@/app/api/v1/osograph/utils/errors";
 import {
   getMaterializations,
   getModelContext,
@@ -154,6 +157,11 @@ export const dataModelTypeResolvers: Pick<
       .resolve(async (parent, _args, context) => {
         const tableId = generateTableId("USER_MODEL", parent.id);
 
+        if (!context.authenticatedUser) {
+          throw ServerErrors.internal(
+            "authenticatedUser required for previewData",
+          );
+        }
         return executePreviewQuery(
           parent.org_id,
           parent.dataset_id,

@@ -27,7 +27,17 @@ export const datasetQueries: DatasetQueryResolvers = {
   datasets: createResolver<DatasetQueryResolvers, "datasets">()
     .use(withAuthenticatedClient())
     .resolve(async (_, args, context) => {
-      const options: ExplicitClientQueryOptions<"datasets"> = {
+      const systemOptions: ExplicitClientQueryOptions<"datasets"> = {
+        client: context.client,
+        orgIds: [],
+        tableName: "datasets",
+        whereSchema: DatasetWhereSchema,
+        basePredicate: {
+          is: [{ key: "deleted_at", value: null }],
+        },
+      };
+
+      const userOptions: ExplicitClientQueryOptions<"datasets"> = {
         client: context.client,
         orgIds: context.orgIds,
         tableName: "datasets",
@@ -42,7 +52,11 @@ export const datasetQueries: DatasetQueryResolvers = {
         resourceConfig: RESOURCE_CONFIG["dataset"],
       };
 
-      return queryWithPagination(args, context, options);
+      return queryWithPagination(
+        args,
+        context,
+        context.systemCredentials ? systemOptions : userOptions,
+      );
     }),
 
   marketplaceDatasets: createResolver<

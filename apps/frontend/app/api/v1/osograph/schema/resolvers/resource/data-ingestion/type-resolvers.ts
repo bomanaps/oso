@@ -12,9 +12,9 @@ import type {
   Resolvers,
 } from "@/app/api/v1/osograph/types/generated/types";
 import { DataIngestionFactoryTypeSchema } from "@/app/api/v1/osograph/types/generated/validation";
+import { ServerErrors } from "@/app/api/v1/osograph/utils/errors";
 import { createResolver } from "@/app/api/v1/osograph/utils/resolver-builder";
 import { withOrgResourceClient } from "@/app/api/v1/osograph/utils/resolver-middleware";
-import z from "zod";
 
 export const dataIngestionTypeResolvers: Pick<Resolvers, "DataIngestion"> = {
   DataIngestion: {
@@ -23,7 +23,7 @@ export const dataIngestionTypeResolvers: Pick<Resolvers, "DataIngestion"> = {
     datasetId: (parent) => parent.dataset_id,
     factoryType: (parent) =>
       DataIngestionFactoryTypeSchema.parse(parent.factory_type),
-    config: (parent) => z.record(z.unknown()).parse(parent.config),
+    config: (parent) => parent.config,
     createdAt: (parent) => parent.created_at,
     updatedAt: (parent) => parent.updated_at,
     modelContext: createResolver<DataIngestionResolvers, "modelContext">()
@@ -56,6 +56,11 @@ export const dataIngestionTypeResolvers: Pick<Resolvers, "DataIngestion"> = {
       .resolve(async (parent, args, context) => {
         const tableId = generateTableId("DATA_INGESTION", args.tableName);
 
+        if (!context.authenticatedUser) {
+          throw ServerErrors.internal(
+            "authenticatedUser required for previewData",
+          );
+        }
         return executePreviewQuery(
           parent.org_id,
           parent.dataset_id,

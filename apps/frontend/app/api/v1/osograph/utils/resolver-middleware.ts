@@ -82,7 +82,9 @@ export function withOrgScopedClient<TParent, TArgs>(
       context,
       orgId,
     );
-    const authenticatedUser = requireAuthentication(context.user);
+    const authenticatedUser = context.systemCredentials
+      ? null
+      : requireAuthentication(context.user);
 
     const enhancedContext: OrgScopedContext = {
       ...context,
@@ -134,7 +136,9 @@ export function withAuthenticatedClient<
   return async (parent, context, args) => {
     const { client, userId, orgIds, orgScope } =
       await getAuthenticatedClient(context);
-    const authenticatedUser = requireAuthentication(context.user);
+    const authenticatedUser = context.systemCredentials
+      ? null
+      : requireAuthentication(context.user);
 
     const enhancedContext: AuthenticatedClientContext = {
       ...context,
@@ -204,7 +208,9 @@ export function withOrgResourceClient<TParent, TArgs>(
       resourceId,
       requiredPermission,
     );
-    const authenticatedUser = requireAuthentication(context.user);
+    const authenticatedUser = context.systemCredentials
+      ? null
+      : requireAuthentication(context.user);
 
     const enhancedContext: ResourceScopedContext = {
       ...context,

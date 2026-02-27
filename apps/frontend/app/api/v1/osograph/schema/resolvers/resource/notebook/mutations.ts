@@ -132,6 +132,11 @@ export const notebookMutations =
             throw NotebookErrors.notFound();
           }
 
+          if (!context.authenticatedUser) {
+            throw ServerErrors.internal(
+              "authenticatedUser required to run notebook",
+            );
+          }
           const osoToken = await signOsoJwt(context.authenticatedUser, {
             orgId: notebook.organizations.id,
             orgName: notebook.organizations.org_name,
@@ -220,7 +225,7 @@ export const notebookMutations =
             .from("published_notebooks")
             .update({
               deleted_at: new Date().toISOString(),
-              updated_by: context.authenticatedUser.userId,
+              updated_by: context.authenticatedUser?.userId,
             })
             .eq("id", publishedNotebook.id);
           if (updateError) {

@@ -15,6 +15,25 @@ function urlWithSearchParams(url: string, searchParams: URLSearchParams) {
   return `${url}?${searchParams.toString()}`;
 }
 
+function redirectToParam(
+  param: string | null,
+  label: string,
+  baseUrl: string,
+): NextResponse | null {
+  if (!param) return null;
+  try {
+    const destination = new URL(param, baseUrl);
+    if (destination.origin !== new URL(baseUrl).origin) {
+      logger.log(`/start: Invalid ${label} param rejected: ${param}`);
+      return NextResponse.redirect(new URL("/", baseUrl));
+    }
+    return NextResponse.redirect(destination);
+  } catch {
+    logger.log(`/start: Unparseable ${label} param: ${param}`);
+    return NextResponse.redirect(new URL("/", baseUrl));
+  }
+}
+
 export const GET = withPostHogTracking(async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
   const supabaseClient = await createServerClient();
@@ -26,6 +45,21 @@ export const GET = withPostHogTracking(async (req: NextRequest) => {
     return NextResponse.redirect(
       new URL(urlWithSearchParams("/login", searchParams), req.url),
     );
+  }
+
+  // NOTE: We need to remove the legacy `next` handling
+  // for invites, but we want to support old links that have the invite path in the `next` param
+  const nextParam = searchParams.get("next");
+  const inviteParam = searchParams.get("invite");
+
+  const legacyInvitePath = nextParam?.startsWith("/invite/") ? nextParam : null;
+  const inviteRedirect = redirectToParam(
+    inviteParam ?? legacyInvitePath,
+    "invite",
+    req.url,
+  );
+  if (inviteRedirect) {
+    return inviteRedirect;
   }
 
   // Check if the user is part of any any organizations
@@ -43,10 +77,6 @@ export const GET = withPostHogTracking(async (req: NextRequest) => {
     return NextResponse.redirect(
       new URL(urlWithSearchParams("/create-org", searchParams), req.url),
     );
-  }
-
-  if (searchParams.get("next")) {
-    return NextResponse.redirect(new URL(searchParams.get("next")!, req.url));
   }
 
   // Find the user's highest tier organization
@@ -75,6 +105,16 @@ export const GET = withPostHogTracking(async (req: NextRequest) => {
         new URL(`/examples?orgName=${org.org_name}`, req.url),
       );
     }
+  }
+
+  // If there's a "next" param, redirect there
+  const nextRedirect = redirectToParam(
+    searchParams.get("next"),
+    "next",
+    req.url,
+  );
+  if (nextRedirect) {
+    return nextRedirect;
   }
 
   // Default logged-in case - redirect to organization dashboard

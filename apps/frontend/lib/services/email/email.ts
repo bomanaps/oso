@@ -22,7 +22,7 @@ export async function sendInvitationEmail({
   inviterName,
 }: InvitationEmailData): Promise<void> {
   const PROTOCOL = DOMAIN.includes("localhost") ? "http" : "https";
-  const loginUrl = `${PROTOCOL}://${DOMAIN}/login?next=${`/invite/${inviteToken}`}`;
+  const loginUrl = `${PROTOCOL}://${DOMAIN}/login?invite=${`/invite/${inviteToken}`}`;
 
   const subject = `${
     inviterName || "Someone"

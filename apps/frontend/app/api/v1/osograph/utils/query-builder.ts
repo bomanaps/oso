@@ -98,7 +98,9 @@ export function _inferQueryTypeWithPermission<TTable extends ValidTableName>(
 
   return client
     .from(tableName as ResolvedTableName)
-    .select("*, permission:resource_permissions()", { count: "exact" });
+    .select("*, org:organizations(), permission:resource_permissions()", {
+      count: "exact",
+    });
 }
 
 export async function buildQuery<TTable extends ValidTableName>(

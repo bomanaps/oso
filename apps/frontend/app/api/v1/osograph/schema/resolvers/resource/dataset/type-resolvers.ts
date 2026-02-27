@@ -25,6 +25,7 @@ import type {
 } from "@/app/api/v1/osograph/types/generated/types";
 import { createResolver } from "@/app/api/v1/osograph/utils/resolver-builder";
 import { withOrgResourceClient } from "@/app/api/v1/osograph/utils/resolver-middleware";
+import { generateTableId } from "@/app/api/v1/osograph/utils/model";
 
 export const datasetTypeResolvers: Pick<
   Resolvers,
@@ -102,26 +103,58 @@ export const datasetTypeResolvers: Pick<
       .use(withOrgResourceClient("dataset", ({ parent }) => parent.id, "read"))
       .resolve(async (parent, args: FilterableConnectionArgs, context) => {
         switch (parent.dataset_type) {
-          case "USER_MODEL":
-            return queryWithPagination(args, context, {
+          // For USER_MODEL and STATIC_MODEL we get directly from the respective tables since
+          // it's possible to create a model and not run a materialization.
+          // For DATA_INGESTION and DATA_CONNECTION we get from the *_as_table views since
+          // the tables of those types is created automatically.
+          case "USER_MODEL": {
+            const userModel = await queryWithPagination(args, context, {
               client: context.client,
               orgIds: parent.org_id,
-              tableName: "model_as_table",
+              tableName: "model",
               whereSchema: DataModelWhereSchema,
               basePredicate: {
                 eq: [{ key: "dataset_id", value: parent.id }],
+                is: [{ key: "deleted_at", value: null }],
               },
             });
-          case "STATIC_MODEL":
-            return queryWithPagination(args, context, {
+            return {
+              ...userModel,
+              edges: userModel.edges.map((edge) => ({
+                ...edge,
+                node: {
+                  dataset_id: parent.id,
+                  org_id: parent.org_id,
+                  table_id: generateTableId("USER_MODEL", edge.node.id),
+                  table_name: edge.node.name,
+                },
+              })),
+            };
+          }
+          case "STATIC_MODEL": {
+            const staticModel = await queryWithPagination(args, context, {
               client: context.client,
               orgIds: parent.org_id,
-              tableName: "static_model_as_table",
+              tableName: "static_model",
               whereSchema: StaticModelWhereSchema,
               basePredicate: {
                 eq: [{ key: "dataset_id", value: parent.id }],
+                is: [{ key: "deleted_at", value: null }],
               },
             });
+            return {
+              ...staticModel,
+              edges: staticModel.edges.map((edge) => ({
+                ...edge,
+                node: {
+                  dataset_id: parent.id,
+                  org_id: parent.org_id,
+                  table_id: generateTableId("STATIC_MODEL", edge.node.id),
+                  table_name: edge.node.name,
+                },
+              })),
+            };
+          }
           case "DATA_INGESTION":
             return queryWithPagination(args, context, {
               client: context.client,

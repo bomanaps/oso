@@ -34,6 +34,7 @@ class DataConnectionType(str, Enum):
     POSTGRESQL = "POSTGRESQL"
     GSHEETS = "GSHEETS"
     BIGQUERY = "BIGQUERY"
+    ICEBERG = "ICEBERG"
 
 
 class DataIngestionFactoryType(str, Enum):

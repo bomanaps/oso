@@ -101,6 +101,7 @@ timeseries_metrics(
         "int_events_daily__l2_transactions",
         "int_events_daily__defillama",
         "int_events_daily__github",
+        "int_events_daily__github_unified",
         "int_events_daily__github_with_lag",
         "int_events_daily__funding",
         "int_events_aux_prs",

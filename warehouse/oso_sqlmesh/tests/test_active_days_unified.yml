@@ -63,3 +63,132 @@ test_active_days_unified_excludes_non_activity_events:
   outputs:
     query:
       rows: []
+
+test_active_days_unified_to_project_counts_distinct_days:
+  model: oso.contributor_active_days_unified_to_project_monthly
+  vars:
+    start: 2024-01-01
+    end: 2024-01-31
+  inputs:
+    oso.int_events_daily__github_unified:
+      rows:
+        # user_1 active on 2 days on repo_1 (-> project_1)
+        - bucket_day: 2024-01-01
+          from_artifact_id: user_1
+          to_artifact_id: repo_1
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 3
+        - bucket_day: 2024-01-01   # same day, different event type — still 1 distinct day
+          from_artifact_id: user_1
+          to_artifact_id: repo_1
+          event_source: GITHUB
+          event_type: ISSUE_OPENED
+          amount: 1
+        - bucket_day: 2024-01-05
+          from_artifact_id: user_1
+          to_artifact_id: repo_1
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 2
+        # user_2 active on 1 day on repo_2 (-> project_2)
+        - bucket_day: 2024-01-10
+          from_artifact_id: user_2
+          to_artifact_id: repo_2
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 1
+    oso.artifacts_by_project_v1:
+      rows:
+        - artifact_id: repo_1
+          project_id: project_1
+        - artifact_id: repo_2
+          project_id: project_2
+  outputs:
+    query:
+      rows:
+        - metrics_sample_date: 2024-01-01
+          event_source: GITHUB
+          to_project_id: project_1
+          from_artifact_id: user_1
+          metric: contributor_active_days_unified_monthly
+          amount: 2   # Jan 1 and Jan 5
+        - metrics_sample_date: 2024-01-01
+          event_source: GITHUB
+          to_project_id: project_2
+          from_artifact_id: user_2
+          metric: contributor_active_days_unified_monthly
+          amount: 1   # Jan 10
+
+test_active_days_unified_to_collection_counts_distinct_days:
+  model: oso.contributor_active_days_unified_to_collection_monthly
+  vars:
+    start: 2024-01-01
+    end: 2024-01-31
+  inputs:
+    oso.int_events_daily__github_unified:
+      rows:
+        # user_1 active on 2 days on repo_1 (-> project_1 -> collection_1)
+        - bucket_day: 2024-01-01
+          from_artifact_id: user_1
+          to_artifact_id: repo_1
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 3
+        - bucket_day: 2024-01-05
+          from_artifact_id: user_1
+          to_artifact_id: repo_1
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 2
+        # user_2 active on 1 day on repo_2 (-> project_2 -> collection_1)
+        - bucket_day: 2024-01-10
+          from_artifact_id: user_2
+          to_artifact_id: repo_2
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 1
+        # user_3 active on 1 day on repo_3 (-> project_3 -> collection_2)
+        - bucket_day: 2024-01-15
+          from_artifact_id: user_3
+          to_artifact_id: repo_3
+          event_source: GITHUB
+          event_type: COMMIT_CODE
+          amount: 1
+    oso.artifacts_by_project_v1:
+      rows:
+        - artifact_id: repo_1
+          project_id: project_1
+        - artifact_id: repo_2
+          project_id: project_2
+        - artifact_id: repo_3
+          project_id: project_3
+    oso.projects_by_collection_v1:
+      rows:
+        - project_id: project_1
+          collection_id: collection_1
+        - project_id: project_2
+          collection_id: collection_1
+        - project_id: project_3
+          collection_id: collection_2
+  outputs:
+    query:
+      rows:
+        - metrics_sample_date: 2024-01-01
+          event_source: GITHUB
+          to_collection_id: collection_1
+          from_artifact_id: user_1
+          metric: contributor_active_days_unified_monthly
+          amount: 2   # Jan 1 and Jan 5
+        - metrics_sample_date: 2024-01-01
+          event_source: GITHUB
+          to_collection_id: collection_1
+          from_artifact_id: user_2
+          metric: contributor_active_days_unified_monthly
+          amount: 1   # Jan 10
+        - metrics_sample_date: 2024-01-01
+          event_source: GITHUB
+          to_collection_id: collection_2
+          from_artifact_id: user_3
+          metric: contributor_active_days_unified_monthly
+          amount: 1   # Jan 15

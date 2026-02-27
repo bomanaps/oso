@@ -1658,6 +1658,7 @@ export type DataConnectionTableInput = {
 export enum DataConnectionType {
   Bigquery = "BIGQUERY",
   Gsheets = "GSHEETS",
+  Iceberg = "ICEBERG",
   Postgresql = "POSTGRESQL",
 }
 

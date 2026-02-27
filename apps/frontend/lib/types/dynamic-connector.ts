@@ -2,6 +2,7 @@ export const ALLOWED_CONNECTORS = [
   "postgresql",
   "gsheets",
   "bigquery",
+  "iceberg",
 ] as const;
 
 export type ConnectorType = (typeof ALLOWED_CONNECTORS)[number];

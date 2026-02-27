@@ -396,6 +396,7 @@ export type DataConnectionTableInput = {
 export const DataConnectionType = {
   Bigquery: "BIGQUERY",
   Gsheets: "GSHEETS",
+  Iceberg: "ICEBERG",
   Postgresql: "POSTGRESQL",
 } as const;
 

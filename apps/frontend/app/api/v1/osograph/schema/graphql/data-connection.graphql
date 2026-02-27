@@ -2,6 +2,7 @@ enum DataConnectionType {
   POSTGRESQL
   GSHEETS
   BIGQUERY
+  ICEBERG
 }
 
 type DataConnection {

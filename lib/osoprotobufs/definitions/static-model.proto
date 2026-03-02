@@ -9,6 +9,6 @@ message StaticModelRunRequest {
   // The dataset on which the models are to be run
   string dataset_id = 2;
 
-  // IDs of the models to run on the dataset. Should not be empty.
+  // IDs of the models to run on the dataset. If empty, all models will be run.
   repeated string model_ids = 3;
 }

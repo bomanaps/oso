@@ -7,6 +7,9 @@ from dlt.sources.filesystem import readers
 from osoprotobufs.static_model_pb2 import StaticModelRunRequest
 from scheduler.dlt_destination import DLTDestinationResource
 from scheduler.graphql_client.client import Client
+from scheduler.graphql_client.get_static_models import (
+    GetStaticModelsDatasetsEdgesNodeTypeDefinitionStaticModelDefinition,
+)
 from scheduler.mq.common import RunHandler
 from scheduler.types import (
     FailedResponse,
@@ -35,13 +38,11 @@ class StaticModelRunRequestHandler(RunHandler[StaticModelRunRequest]):
         upload_filesystem_credentials: FileSystemCredentials | None,
         oso_client: Client,
     ) -> HandlerResponse:
-        num_models = len(message.model_ids)
-
         context.log.info(
             "Received StaticModelRunRequest",
             extra={
                 "dataset_id": message.dataset_id,
-                "num_models": num_models,
+                "num_requested_models": len(message.model_ids),
             },
         )
 
@@ -73,6 +74,28 @@ class StaticModelRunRequestHandler(RunHandler[StaticModelRunRequest]):
 
         dataset = dataset_and_models.datasets.edges[0]
 
+        type_def = dataset.node.type_definition
+        if not isinstance(
+            type_def,
+            GetStaticModelsDatasetsEdgesNodeTypeDefinitionStaticModelDefinition,
+        ):
+            context.log.error(
+                "Dataset is not a static model dataset",
+                extra={"dataset_id": message.dataset_id},
+            )
+            return FailedResponse(
+                message="Dataset is not a static model dataset",
+            )
+
+        all_model_ids = [edge.node.id for edge in type_def.static_models.edges]
+
+        if not message.model_ids:
+            model_ids_to_run = all_model_ids
+        else:
+            model_ids_to_run = [
+                mid for mid in all_model_ids if mid in set(message.model_ids)
+            ]
+
         org_id = dataset.node.organization.id
 
         placeholder_table_ref = TableReference(
@@ -92,7 +115,7 @@ class StaticModelRunRequestHandler(RunHandler[StaticModelRunRequest]):
             "Starting processing of static models",
             extra={
                 "dataset_id": message.dataset_id,
-                "num_models": num_models,
+                "num_models": len(model_ids_to_run),
             },
         )
 
@@ -106,7 +129,7 @@ class StaticModelRunRequestHandler(RunHandler[StaticModelRunRequest]):
             dataset_schema=schema_name,
             user=warehouse_user,
         ) as dlt_destination_instance:
-            for model_id in message.model_ids:
+            for model_id in model_ids_to_run:
                 async with context.step_context(
                     name=f"static_model_{model_id}",
                     display_name=f"Static Model {model_id}",
@@ -190,7 +213,7 @@ class StaticModelRunRequestHandler(RunHandler[StaticModelRunRequest]):
             "Static model processing completed successfully",
             extra={
                 "dataset_id": message.dataset_id,
-                "num_models": num_models,
+                "num_models": len(model_ids_to_run),
             },
         )
 

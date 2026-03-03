@@ -2,7 +2,6 @@ import {
   getMaterializations,
   getModelContext,
 } from "@/app/api/v1/osograph/utils/resolver-helpers";
-import type { FilterableConnectionArgs } from "@/app/api/v1/osograph/utils/pagination";
 import {
   executePreviewQuery,
   generateTableId,
@@ -31,20 +30,21 @@ export const dataIngestionTypeResolvers: Pick<Resolvers, "DataIngestion"> = {
       .resolve(async (parent, args, context) =>
         getModelContext(parent.dataset_id, args.tableName, context.client),
       ),
-    materializations: async (
-      parent,
-      args: FilterableConnectionArgs & { tableName: string },
-      context,
-    ) => {
-      const { tableName, ...restArgs } = args;
-      return getMaterializations(
-        restArgs,
-        context,
-        parent.org_id,
-        parent.dataset_id,
-        generateTableId("DATA_INGESTION", tableName),
-      );
-    },
+    materializations: createResolver<
+      DataIngestionResolvers,
+      "materializations"
+    >()
+      .use(withOrgResourceClient("data_ingestion", ({ parent }) => parent.id))
+      .resolve(async (parent, args, context) =>
+        getMaterializations(
+          args,
+          context,
+          parent.org_id,
+          parent.dataset_id,
+          generateTableId("DATA_INGESTION", args.tableName),
+          context.client,
+        ),
+      ),
     previewData: createResolver<DataIngestionResolvers, "previewData">()
       .use(
         withOrgResourceClient(

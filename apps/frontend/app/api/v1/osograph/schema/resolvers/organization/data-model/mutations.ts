@@ -40,6 +40,41 @@ export const dataModelMutations =
             throw ServerErrors.database("Failed to create dataModel");
           }
 
+          // Opportunistically attempt to create an initial model revision. If
+          // this fails, the application is setup to still function, but this
+          // endpoint will return an error message.
+          const { error: revisionError } = await context.client
+            .from("model_revision")
+            .insert({
+              org_id: data.org_id,
+              model_id: data.id,
+              name: input.name,
+              description: "",
+              revision_number: 0,
+              hash: "",
+              language: "sql",
+              code: "",
+              cron: "@daily",
+              start: null,
+              end: null,
+              schema: [],
+              depends_on: [],
+              partitioned_by: null,
+              clustered_by: null,
+              kind: "FULL",
+              kind_options: null,
+            })
+            .select()
+            .single();
+
+          if (revisionError) {
+            logger.error(
+              "Failed to create initial model revision:",
+              revisionError,
+            );
+            // Don't throw an error here since the data model was created successfully, and the application can still function without an initial revision. The user can create a revision manually after the fact.
+          }
+
           return {
             success: true,
             message: "DataModel created successfully",

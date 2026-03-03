@@ -8,7 +8,6 @@ import { ServerErrors } from "@/app/api/v1/osograph/utils/errors";
 import { createResolver } from "@/app/api/v1/osograph/utils/resolver-builder";
 import { withOrgResourceClient } from "@/app/api/v1/osograph/utils/resolver-middleware";
 import { getOrganization } from "@/app/api/v1/osograph/utils/auth";
-import type { FilterableConnectionArgs } from "@/app/api/v1/osograph/utils/pagination";
 import {
   getMaterializations,
   getModelContext,
@@ -47,20 +46,21 @@ export const dataConnectionTypeResolvers: Pick<
     datasetId: (parent) => parent.dataset_id,
     dataConnectionId: (parent) => parent.data_connection_id,
     schema: (parent) => parent.schema_name,
-    materializations: async (
-      parent,
-      args: FilterableConnectionArgs & { tableName: string },
-      context,
-    ) => {
-      const { tableName, ...restArgs } = args;
-      return getMaterializations(
-        restArgs,
-        context,
-        parent.org_id,
-        parent.dataset_id,
-        generateTableId("DATA_CONNECTION", tableName),
-      );
-    },
+    materializations: createResolver<
+      DataConnectionAliasResolvers,
+      "materializations"
+    >()
+      .use(withOrgResourceClient("data_connection", ({ parent }) => parent.id))
+      .resolve(async (parent, args, context) =>
+        getMaterializations(
+          args,
+          context,
+          parent.org_id,
+          parent.dataset_id,
+          generateTableId("DATA_CONNECTION", args.tableName),
+          context.client,
+        ),
+      ),
     modelContext: createResolver<DataConnectionAliasResolvers, "modelContext">()
       .use(
         withOrgResourceClient(

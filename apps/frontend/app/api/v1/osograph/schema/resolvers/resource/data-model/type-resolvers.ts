@@ -36,6 +36,30 @@ export const dataModelTypeResolvers: Pick<
   "DataModel" | "DataModelRevision" | "DataModelRelease" | "DataModelDependency"
 > = {
   DataModel: {
+    name: createResolver<DataModelResolvers, "name">()
+      .use(withOrgResourceClient("data_model", ({ parent }) => parent.id))
+      .resolve(async (parent, _args, context) => {
+        // The name field is stored on the model_revision table to allow
+        // changing the name of the model without losing the history of
+        // revisions and releases. The latest revision's name is considered the
+        // current name of the model.
+        const { data, error } = await context.client
+          .from("model_revision")
+          .select("name")
+          .eq("model_id", parent.id)
+          .order("revision_number", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error || !data) {
+          // Fallback to the name on the model table if there's an error or no
+          // revisions. This is a stop-gap solution until we have proper
+          // transactions on the backend (i.e. migrate away from supabase) to
+          // ensure we can always get a name for the model.
+          return parent.name;
+        }
+        return data.name;
+      }),
     orgId: (parent) => parent.org_id,
     organization: createResolver<DataModelResolvers, "organization">()
       .use(

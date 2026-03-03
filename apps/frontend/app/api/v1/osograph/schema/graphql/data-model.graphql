@@ -213,6 +213,12 @@ input DataModelKindOptionsInput {
 
 input CreateDataModelRevisionInput {
   dataModelId: ID!
+
+  """
+  The name of the model. This is the name users will use when referencing this
+  model as a table. This allows changing the name of the model without losing
+  the history of revisions and releases. 
+  """
   name: String!
   description: String
   language: String!

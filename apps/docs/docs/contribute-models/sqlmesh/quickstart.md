@@ -27,11 +27,19 @@ DuckDB is required for local development and testing of SQLMesh models.
 brew install duckdb
 ```
 
-**Debian/Ubuntu (using APT):**
+**Debian/Ubuntu:**
 
 ```bash
-sudo apt-get install duckdb
+# Option 1: Direct download (recommended)
+wget https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-amd64.zip
+unzip duckdb_cli-linux-amd64.zip
+sudo mv duckdb /usr/local/bin/
+
+# Option 2: Via pip
+pip install duckdb
 ```
+
+Note: DuckDB is not available in standard apt repositories. See [DuckDB Installation](https://duckdb.org/docs/installation/) for more options.
 
 ### Clone the OSO Repository
 

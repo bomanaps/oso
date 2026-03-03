@@ -59,7 +59,7 @@ Data models in OSO are organized in the `warehouse/oso_sqlmesh/models` directory
 
 - **Staging (stg)**: Initial transformations that clean and standardize source data. There should be no joins or complex logic in staging models. A staging model should be able to run independently and feed everything downstream from it that requires the same source data.
 - **Intermediate (int)**: Models that join and transform staging models into more complex structures. Intermediate models may contain aggregations or other complex logic. If you in doubt about where to put a model, it should probably be an intermediate model.
-- **Mart**: Final models that are exposed to end users, typically containing registries, metrics, or aggregagated event data. We aim to have as few columns as possible in mart models to keep them performant. Marts models have versions postfixed with `_v0`, `_v1`, etc. Anything with a a `v0` is considered a development version and may be unstable.
+- **Mart**: Final models that are exposed to end users, typically containing registries, metrics, or aggregated event data. We aim to have as few columns as possible in mart models to keep them performant. Marts models have versions postfixed with `_v0`, `_v1`, etc. Anything with a a `v0` is considered a development version and may be unstable.
 
 In summary, staging models feed intermediate models, which feed mart models. When contributing new models, it's important to follow this structure to maintain consistency across the codebase.
 

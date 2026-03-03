@@ -24,6 +24,7 @@ type Documents = {
   "\n      mutation CreateDataConnection($input: CreateDataConnectionInput!) {\n        createDataConnection(input: $input) {\n          success\n          message\n          dataConnection {\n            id\n            orgId\n            name\n            type\n            config\n          }\n        }\n      }\n    ": typeof types.CreateDataConnectionDocument;
   "\n      mutation DeleteDataConnection($id: ID!) {\n        deleteDataConnection(id: $id) {\n          success\n          message\n        }\n      }\n    ": typeof types.DeleteDataConnectionDocument;
   "\n      mutation SyncDataConnection($id: ID!) {\n        syncDataConnection(id: $id) {\n          success\n          message\n          run {\n            id\n          }\n        }\n      }\n    ": typeof types.SyncDataConnectionDocument;
+  "\n      mutation AcceptInvitation($input: AcceptInvitationInput!) {\n        acceptInvitation(input: $input) {\n          success\n          message\n          member {\n            userId\n            orgId\n            userRole\n          }\n        }\n      }\n    ": typeof types.AcceptInvitationDocument;
   "\n      mutation GrantResourcePermission($input: GrantResourcePermissionInput!) {\n        grantResourcePermission(input: $input) {\n          success\n          message\n        }\n      }\n    ": typeof types.GrantResourcePermissionDocument;
   "\n      mutation SavePreview($input: SaveNotebookPreviewInput!) {\n        saveNotebookPreview(input: $input) {\n          success\n          message\n        }\n      }\n    ": typeof types.SavePreviewDocument;
   "\n      mutation CreateDataset($input: CreateDatasetInput!) {\n        createDataset(input: $input) {\n          success\n          message\n          dataset {\n            id\n            name\n            displayName\n            description\n            type\n          }\n        }\n      }\n    ": typeof types.CreateDatasetDocument;
@@ -69,6 +70,8 @@ const documents: Documents = {
     types.DeleteDataConnectionDocument,
   "\n      mutation SyncDataConnection($id: ID!) {\n        syncDataConnection(id: $id) {\n          success\n          message\n          run {\n            id\n          }\n        }\n      }\n    ":
     types.SyncDataConnectionDocument,
+  "\n      mutation AcceptInvitation($input: AcceptInvitationInput!) {\n        acceptInvitation(input: $input) {\n          success\n          message\n          member {\n            userId\n            orgId\n            userRole\n          }\n        }\n      }\n    ":
+    types.AcceptInvitationDocument,
   "\n      mutation GrantResourcePermission($input: GrantResourcePermissionInput!) {\n        grantResourcePermission(input: $input) {\n          success\n          message\n        }\n      }\n    ":
     types.GrantResourcePermissionDocument,
   "\n      mutation SavePreview($input: SaveNotebookPreviewInput!) {\n        saveNotebookPreview(input: $input) {\n          success\n          message\n        }\n      }\n    ":
@@ -191,6 +194,12 @@ export function gql(
 export function gql(
   source: "\n      mutation SyncDataConnection($id: ID!) {\n        syncDataConnection(id: $id) {\n          success\n          message\n          run {\n            id\n          }\n        }\n      }\n    ",
 ): (typeof documents)["\n      mutation SyncDataConnection($id: ID!) {\n        syncDataConnection(id: $id) {\n          success\n          message\n          run {\n            id\n          }\n        }\n      }\n    "];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "\n      mutation AcceptInvitation($input: AcceptInvitationInput!) {\n        acceptInvitation(input: $input) {\n          success\n          message\n          member {\n            userId\n            orgId\n            userRole\n          }\n        }\n      }\n    ",
+): (typeof documents)["\n      mutation AcceptInvitation($input: AcceptInvitationInput!) {\n        acceptInvitation(input: $input) {\n          success\n          message\n          member {\n            userId\n            orgId\n            userRole\n          }\n        }\n      }\n    "];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

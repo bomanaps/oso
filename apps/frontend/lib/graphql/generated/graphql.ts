@@ -9662,6 +9662,25 @@ export type SyncDataConnectionMutation = {
   };
 };
 
+export type AcceptInvitationMutationVariables = Exact<{
+  input: AcceptInvitationInput;
+}>;
+
+export type AcceptInvitationMutation = {
+  __typename?: "Mutation";
+  acceptInvitation: {
+    __typename?: "AcceptInvitationPayload";
+    success: boolean;
+    message?: string | null;
+    member?: {
+      __typename?: "OrganizationMember";
+      userId: string;
+      orgId: string;
+      userRole: MemberRole;
+    } | null;
+  };
+};
+
 export type GrantResourcePermissionMutationVariables = Exact<{
   input: GrantResourcePermissionInput;
 }>;
@@ -11434,6 +11453,79 @@ export const SyncDataConnectionDocument = {
 } as unknown as DocumentNode<
   SyncDataConnectionMutation,
   SyncDataConnectionMutationVariables
+>;
+export const AcceptInvitationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "AcceptInvitation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: {
+            kind: "Variable",
+            name: { kind: "Name", value: "input" },
+          },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "AcceptInvitationInput" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "acceptInvitation" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "input" },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "success" } },
+                { kind: "Field", name: { kind: "Name", value: "message" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "member" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "userId" },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "orgId" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "userRole" },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AcceptInvitationMutation,
+  AcceptInvitationMutationVariables
 >;
 export const GrantResourcePermissionDocument = {
   kind: "Document",

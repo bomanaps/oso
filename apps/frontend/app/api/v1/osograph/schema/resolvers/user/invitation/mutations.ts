@@ -80,15 +80,26 @@ export const invitationMutations: InvitationMutationResolvers =
             );
           }
 
-          const { data: member, error: memberError } = await context.client
+          const { data: restoredMember } = await context.client
             .from("users_by_organization")
-            .insert({
-              user_id: context.userId,
-              org_id: invitation.org_id,
-              user_role: "admin",
-            })
+            .update({ deleted_at: null, user_role: "admin" })
+            .eq("user_id", context.userId)
+            .eq("org_id", invitation.org_id)
+            .not("deleted_at", "is", null)
             .select()
-            .single();
+            .maybeSingle();
+
+          const { data: member, error: memberError } = restoredMember
+            ? { data: restoredMember, error: null }
+            : await context.client
+                .from("users_by_organization")
+                .insert({
+                  user_id: context.userId,
+                  org_id: invitation.org_id,
+                  user_role: "admin",
+                })
+                .select()
+                .single();
 
           if (memberError) {
             logger.error("Failed to create membership:", memberError);

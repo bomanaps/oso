@@ -1694,31 +1694,39 @@ class OsoAppClient {
   /**
    * Accepts an invitation using the invitation ID
    * @param args - Contains the invitation ID
-   * @returns Promise<boolean> - Success status
+   * @returns Promise<AcceptInvitationPayload> - The acceptance result
    */
   async acceptInvitation(
     args: Partial<{
       invitationId: string;
     }>,
   ) {
-    console.log("acceptInvitation: ", args);
     const invitationId = ensure(
       args.invitationId,
       "Missing invitationId argument",
     );
 
-    const user = await this.getUser();
+    const ACCEPT_INVITATION_MUTATION = gql(`
+      mutation AcceptInvitation($input: AcceptInvitationInput!) {
+        acceptInvitation(input: $input) {
+          success
+          message
+          member {
+            userId
+            orgId
+            userRole
+          }
+        }
+      }
+    `);
 
-    const { data, error } = await this.supabaseClient.rpc("accept_invitation", {
-      p_invitation_id: invitationId,
-      p_user_id: user.id,
-    });
+    const data = await executeGraphQL(
+      ACCEPT_INVITATION_MUTATION,
+      { input: { invitationId } },
+      "Failed to accept invitation",
+    );
 
-    if (error) {
-      throw error;
-    }
-
-    return data;
+    return data.acceptInvitation;
   }
 
   /**

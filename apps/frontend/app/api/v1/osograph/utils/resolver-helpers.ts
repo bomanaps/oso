@@ -317,6 +317,7 @@ export async function getModelRunConnection(
   return buildConnectionOrEmpty(data, args, count);
 }
 
+/** @deprecated - use `getMaterializations` with extra client parameters */
 export async function getMaterializations(
   args: FilterableConnectionArgs,
   context: GraphQLContext,

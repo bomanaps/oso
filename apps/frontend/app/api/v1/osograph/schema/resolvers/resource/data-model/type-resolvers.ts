@@ -142,13 +142,19 @@ export const dataModelTypeResolvers: Pick<
       .resolve(async (parent, _args, context) =>
         getModelContext(parent.dataset_id, parent.id, context.client),
       ),
-    materializations: async (parent, args: FilterableConnectionArgs, context) =>
-      getMaterializations(
-        args,
-        context,
-        parent.org_id,
-        parent.dataset_id,
-        generateTableId("USER_MODEL", parent.id),
+    materializations: createResolver<DataModelResolvers, "materializations">()
+      .use(
+        withOrgResourceClient("data_model", ({ parent }) => parent.id, "read"),
+      )
+      .resolve(async (parent, args: FilterableConnectionArgs, context) =>
+        getMaterializations(
+          args,
+          context,
+          parent.org_id,
+          parent.dataset_id,
+          generateTableId("USER_MODEL", parent.id),
+          context.client,
+        ),
       ),
     previewData: createResolver<DataModelResolvers, "previewData">()
       .use(
